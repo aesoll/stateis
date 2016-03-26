@@ -4,7 +4,7 @@ stateis.py
 """
 
 
-import click
+import argparse
 import fabric
 from fabric.api import *
 from prettytable import PrettyTable
@@ -17,10 +17,11 @@ def stats():
         kernel = get_kernel()
 
     stats_table = build_stats_table(hostname, kernel)
-
     print("\n")
     print(stats_table)
     print("\n")
+
+    fabric.network.disconnect_all()
 
     return None
 
@@ -71,4 +72,9 @@ def get_ifconfig():
 
 
 if __name__=="__main__":
-    execute(stats)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output_type", help="Specify the type of output " + \
+                    "you'd like the results to be", type=str)
+    args = parser.parse_args()
+    if args.output_type == "table":
+        execute(stats)
