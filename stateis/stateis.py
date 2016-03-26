@@ -3,8 +3,41 @@ stateis.py
 
 """
 
+
+import click
 import fabric
 from fabric.api import *
+from prettytable import PrettyTable
+
+
+def stats():
+    with hide("running", "stdout", "stderr", "status"):
+        hostname = get_hostname()
+        diskinfo = get_diskinfo()
+        kernel = get_kernel()
+
+    stats_table = build_stats_table(hostname, kernel)
+
+    print("\n")
+    print(stats_table)
+    print("\n")
+
+    return None
+
+
+@runs_once
+def build_stats_table(hostname, kernel):
+    table_headers = [
+        "Hostname", "Kernel Version"
+    ]
+
+    stats_table = PrettyTable(table_headers)
+    stats_table.align["Hostname"] = "l"
+    stats_table.align["Kernel Version"] = "r"
+    stats_table.padding_width = 1
+    stats_table.add_row([hostname,kernel])
+
+    return stats_table
 
 
 def get_hostname():
@@ -37,12 +70,5 @@ def get_ifconfig():
     return ifconfig
 
 
-def temp_tests():
-    print(get_hostname())
-    print(get_diskinfo())
-    print(get_kernel())
-    print(get_ifconfig())
-
-
 if __name__=="__main__":
-    execute(temp_tests())
+    execute(stats)
