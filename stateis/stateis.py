@@ -23,10 +23,10 @@ def stats():
 
     with hide("running", "stdout", "stderr", "status"):
         stats.append(get_hostname())
-        diskinfo = get_diskinfo()
         stats.append(get_kernel())
-        for item in diskinfo:
+        for item in get_diskinfo():
             stats.append(item)
+        stats.append(get_processes())
 
     fabric.network.disconnect_all()
 
@@ -40,7 +40,8 @@ def build_stats_table(stats_out):
     associated values grabbed by the functions below
     """
     table_headers = [
-        "IP Address", "Hostname", "Kernel", "Used GB", "Avail GB", "Perc %"
+        "IP Address", "Hostname", "Kernel", "Used GB", "Avail GB", "Perc %",
+        "# Processes"
     ]
 
     stats_table = PrettyTable(table_headers)
@@ -50,6 +51,7 @@ def build_stats_table(stats_out):
     stats_table.align["Used GB"] = "r"
     stats_table.align["Avail GB"] = "r"
     stats_table.align["Perc %"] = "r"
+    stats_table.align["# Processes"] = "r"
     stats_table.padding_width = 1
 
     for key in stats_out:
@@ -75,9 +77,16 @@ def print_stats_table(stats_table):
 
 def get_hostname():
     """
-    Gets hostname
+    Gets hostname using hostname
     """
     return str(run("hostname"))
+
+
+def get_kernel():
+    """
+    Gets kernel information using uname -r
+    """
+    return str(run("uname -r"))
 
 
 def get_diskinfo():
@@ -119,11 +128,16 @@ def _calculate_disk_gb(disk_str):
     return disk_used
 
 
-def get_kernel():
+def get_processes():
     """
-    Gets kernel information
+    Gets the number of running processes on the server using ps
     """
-    return str(run("uname -r"))
+    process_num = 0
+
+    for process in run("ps").split("\n")[0:]:
+        process_num += 1
+
+    return process_num
 
 
 def get_ifconfig():
