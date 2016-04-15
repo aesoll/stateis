@@ -10,35 +10,56 @@ from fabric.api import *
 from prettytable import PrettyTable
 
 
-def stats():
-    with hide("running", "stdout", "stderr", "status"):
-        hostname = get_hostname()
-        diskinfo = get_diskinfo()
-        kernel = get_kernel()
+env.user = ""
+env.password = ""
+env.hosts = []
 
-    stats_table = build_stats_table(hostname, kernel)
+
+def stats():
+    """"""
+    stats = []
+
+    with hide("running", "stdout", "stderr", "status"):
+        stats.append(get_hostname())
+        #stats.append(diskinfo = get_diskinfo()
+        stats.append(get_kernel())
+
+    print(stats)
+    fabric.network.disconnect_all()
+
+    return stats
+
+
+@runs_once
+def build_stats_table(stats_out):
+    """"""
+    table_headers = [
+        "IP Address", "Hostname", "Kernel"
+    ]
+
+    stats_table = PrettyTable(table_headers)
+    stats_table.align["IP Address"] = "l"
+    stats_table.align["Hostname"] = "l"
+    stats_table.align["Kernel"] = "r"
+    stats_table.padding_width = 1
+
+    for key in stats_out:
+        vm_stats = [key]
+        for item in stats_out[key]:
+            vm_stats.append(item)
+        stats_table.add_row(vm_stats)
+
+    return stats_table
+
+
+@runs_once
+def print_stats_table(stats_table):
+    """"""
     print("\n")
     print(stats_table)
     print("\n")
 
-    fabric.network.disconnect_all()
-
     return None
-
-
-@runs_once
-def build_stats_table(hostname, kernel):
-    table_headers = [
-        "Hostname", "Kernel Version"
-    ]
-
-    stats_table = PrettyTable(table_headers)
-    stats_table.align["Hostname"] = "l"
-    stats_table.align["Kernel Version"] = "r"
-    stats_table.padding_width = 1
-    stats_table.add_row([hostname,kernel])
-
-    return stats_table
 
 
 def get_hostname():
@@ -72,9 +93,13 @@ def get_ifconfig():
 
 
 if __name__=="__main__":
+    """"""
     parser = argparse.ArgumentParser()
     parser.add_argument("output_type", help="Specify the type of output " + \
                     "you'd like the results to be", type=str)
     args = parser.parse_args()
+    
     if args.output_type == "table":
-        execute(stats)
+        stats_out = execute(stats)
+        print(stats_out)
+        print_stats_table(build_stats_table(stats_out))
