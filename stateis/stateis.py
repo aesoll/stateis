@@ -28,6 +28,7 @@ def stats():
             stats.append(item)
         stats.append(get_processes())
         stats.append(get_ram_usage())
+        stats.append(get_uptime())
 
     fabric.network.disconnect_all()
 
@@ -42,7 +43,7 @@ def build_stats_table(stats_out):
     """
     table_headers = [
         "IP Address", "Hostname", "Kernel", "Used GB", "Avail GB", "% Used GB",
-        "# Processes", "RAM Use"
+        "# Proc", "RAM Use", "Uptime"
     ]
 
     stats_table = PrettyTable(table_headers)
@@ -52,8 +53,9 @@ def build_stats_table(stats_out):
     stats_table.align["Used GB"] = "r"
     stats_table.align["Avail GB"] = "r"
     stats_table.align["% Used GB"] = "r"
-    stats_table.align["# Processes"] = "r"
+    stats_table.align["# Proc"] = "r"
     stats_table.align["RAM Use"] = "r"
+    stats_table.align["Uptime"] = "r"
     stats_table.padding_width = 1
 
     for key in stats_out:
@@ -166,6 +168,12 @@ def _calculate_ram_usage(ram_total, ram_used):
         return "100%"
     else:
         return str(ram_calc)[2:4] + "%"
+
+
+def get_uptime():
+    uptime = run("uptime").split(" ")
+
+    return uptime[2] + uptime[3][:-1]
 
 
 if __name__=="__main__":
