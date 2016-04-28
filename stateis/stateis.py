@@ -79,6 +79,36 @@ def print_stats_table(stats_table):
     return None
 
 
+@runs_once
+def build_xml_file(stats_out):
+    xml_string = "<servers>\n"
+
+    for key in stats_out:
+        xml_string += "\t<server>\n"
+        xml_string += "\t\t<ip>" + key + "</ip>\n"
+        xml_string += "\t\t<hostname>" + stats_out[key][0] + "</hostname>\n"
+        xml_string += "\t\t<kernel>" + str(stats_out[key][1]) + "</kernel>\n"
+        xml_string += "\t\t<gbused>" + str(stats_out[key][2]) + "</gbused>\n"
+        xml_string += "\t\t<gbavail>" + str(stats_out[key][3]) + "</gbavail>\n"
+        xml_string += "\t\t<gbpercent>" + str(stats_out[key][4]) + "</gbpercent>\n"
+        xml_string += "\t\t<numproc>" + str(stats_out[key][5]) + "</numproc>\n"
+        xml_string += "\t\t<ramuse>" + stats_out[key][6] + "</ramuse>\n"
+        xml_string += "\t\t<uptime>" + stats_out[key][7] + "</uptime>\n"
+        xml_string += "\t</server>\n"
+    xml_string += "</servers>\n"
+
+    return xml_string
+
+
+@runs_once
+def write_xml_file(xml_string):
+    xml_file = open("stateis_output.xml", "w")
+    xml_file.write(xml_string)
+    xml_file.close()
+
+    return None
+
+
 def get_hostname():
     """
     Gets hostname using hostname
@@ -184,7 +214,9 @@ if __name__=="__main__":
     parser.add_argument("output_type", help="Specify the type of output " + \
                     "you'd like the results to be", type=str)
     args = parser.parse_args()
+    stats_out = execute(stats)
 
     if args.output_type == "table":
-        stats_out = execute(stats)
         print_stats_table(build_stats_table(stats_out))
+    elif args.output_type == "xml":
+        write_xml_file(build_xml_file(stats_out))
