@@ -27,6 +27,7 @@ def stats():
         for item in get_diskinfo():
             stats.append(item)
         stats.append(get_processes())
+        stats.append(get_ram_usage())
 
     fabric.network.disconnect_all()
 
@@ -40,8 +41,8 @@ def build_stats_table(stats_out):
     associated values grabbed by the functions below
     """
     table_headers = [
-        "IP Address", "Hostname", "Kernel", "Used GB", "Avail GB", "Perc %",
-        "# Processes"
+        "IP Address", "Hostname", "Kernel", "Used GB", "Avail GB", "% Used GB",
+        "# Processes", "RAM Use"
     ]
 
     stats_table = PrettyTable(table_headers)
@@ -50,8 +51,9 @@ def build_stats_table(stats_out):
     stats_table.align["Kernel"] = "r"
     stats_table.align["Used GB"] = "r"
     stats_table.align["Avail GB"] = "r"
-    stats_table.align["Perc %"] = "r"
+    stats_table.align["% Used GB"] = "r"
     stats_table.align["# Processes"] = "r"
+    stats_table.align["RAM Use"] = "r"
     stats_table.padding_width = 1
 
     for key in stats_out:
@@ -140,15 +142,30 @@ def get_processes():
     return process_num
 
 
-def get_ifconfig():
+def get_ram_usage():
     """
-    Gets ifconfig info
+    Gets the output of free -m and calculates ram usage on the server
     """
-    ifconfig = run("ifconfig").split("\n")[1]
-    address = None
-    netmask = None
+    raw_ram_list = run("free -m").split("\n")[1]
+    filtered_ram_list = filter(None, raw_ram_list.split(" "))
+    ram_total = filtered_ram_list[1]
+    ram_used = filtered_ram_list[2]
+    ram_usage = _calculate_ram_usage(ram_total, ram_used)
 
-    return ifconfig
+    return ram_usage
+
+
+def _calculate_ram_usage(ram_total, ram_used):
+    """
+    Takes 2 string arguments and divides the two to calculate the percentage
+    of RAM used
+    """
+    ram_calc = float(ram_used)/float(ram_total)
+
+    if ram_calc > .99:
+        return "100%"
+    else:
+        return str(ram_calc)[2:4] + "%"
 
 
 if __name__=="__main__":
