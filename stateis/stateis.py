@@ -18,6 +18,11 @@ env.hosts = []
 def stats():
     """
     Main execute to gather server stats and compile them into a list of lists
+
+    Args:
+        None
+    Returns:
+        list: stats (list of lists) - contains all server info
     """
     stats = []
 
@@ -40,6 +45,11 @@ def build_stats_table(stats_out):
     """
     Builds the stats table according to predetermined headers and their
     associated values grabbed by the functions below
+
+    Args:
+        list: stats_out - contains all server info
+    Returns:
+        PrettyTable: stats_table, table object containing server info
     """
     table_headers = [
         "IP Address", "Hostname", "Kernel", "Used GB", "Avail GB", "% Used GB",
@@ -71,6 +81,11 @@ def build_stats_table(stats_out):
 def print_stats_table(stats_table):
     """
     Prints table created in build_stats_table
+
+    Args:
+        PrettyTable: stats_table, table object containing server info
+    Returns:
+        None
     """
     print("\n")
     print(stats_table)
@@ -82,6 +97,12 @@ def print_stats_table(stats_table):
 @runs_once
 def build_xml_file(stats_out):
     """
+    Builds valid xml file as a string according to the list stats_out
+
+    Args:
+        list: stats_out - contains all server info
+    Returns:
+        string: xml_string - contains properly formatted xml
     """
     xml_string = "<servers>\n"
 
@@ -105,6 +126,12 @@ def build_xml_file(stats_out):
 @runs_once
 def write_xml_file(xml_string):
     """
+    Writes valid xml file according to the string xml_string
+
+    Args:
+        string: xml_string - contains properly formatted xml
+    Returns:
+        None
     """
     xml_file = open("stateis_output.xml", "w")
     xml_file.write(xml_string)
@@ -116,6 +143,12 @@ def write_xml_file(xml_string):
 @runs_once
 def build_json_file(stats_out):
     """
+    Builds valid json file as a string according to the list stats_out
+
+    Args:
+        list: stats_out - contains all server info
+    Returns:
+        string: final_json_string - contains properly formatted json
     """
     json_string = "{\n"
 
@@ -141,6 +174,12 @@ def build_json_file(stats_out):
 @runs_once
 def write_json_file(json_string):
     """
+    Writes valid json file according to the string json_string
+
+    Args:
+        string: json_string - contains properly formatted json
+    Returns:
+        None
     """
     json_file = open("stateis_output.json", "w")
     json_file.write(json_string)
@@ -152,6 +191,11 @@ def write_json_file(json_string):
 def get_hostname():
     """
     Gets hostname using hostname
+
+    Args:
+        None
+    Returns:
+        string: output of hostname unix command
     """
     return str(run("hostname"))
 
@@ -159,6 +203,11 @@ def get_hostname():
 def get_kernel():
     """
     Gets kernel information using uname -r
+
+    Args:
+        None
+    Returns:
+        string: output of uname -r unix command
     """
     return str(run("uname -r"))
 
@@ -166,6 +215,11 @@ def get_kernel():
 def get_diskinfo():
     """
     Gets hard disk space information
+
+    Args:
+        None
+    Returns:
+        list: contains float values disk_used, disk_avail, disk_percent
     """
     df_output = run("df -h").split("\n")[1:]
 
@@ -187,6 +241,11 @@ def _calculate_disk_gb(disk_str):
     """
     Converts and returns strings with K, M, or G in the last character to
     the proper float value.
+
+    Args:
+        string: disk_str - contains disk space usage in string format
+    Returns:
+        float: disk_used - contains disk space usage in float format
     """
     disk_used = 0
 
@@ -205,6 +264,11 @@ def _calculate_disk_gb(disk_str):
 def get_processes():
     """
     Gets the number of running processes on the server using ps
+
+    Args:
+        None
+    Returns:
+        int: process_num - number of processes running on system
     """
     process_num = 0
 
@@ -217,6 +281,11 @@ def get_processes():
 def get_ram_usage():
     """
     Gets the output of free -m and calculates ram usage on the server
+
+    Args:
+        None
+    Returns:
+        string: ram_usage - string of calculated ram usage value
     """
     raw_ram_list = run("free -m").split("\n")[1]
     filtered_ram_list = filter(None, raw_ram_list.split(" "))
@@ -231,6 +300,12 @@ def _calculate_ram_usage(ram_total, ram_used):
     """
     Takes 2 string arguments and divides the two to calculate the percentage
     of RAM used
+
+    Args:
+        string: ram_total - string value of total available ram
+        string: ram_used - string value of used ram
+    Returns:
+        string: reformatted ram usage according to total and used
     """
     ram_calc = float(ram_used)/float(ram_total)
 
@@ -241,6 +316,14 @@ def _calculate_ram_usage(ram_total, ram_used):
 
 
 def get_uptime():
+    """
+    Gets the current uptime of the system
+
+    Args:
+        None
+    Returns:
+        string: uptime info in string format with min suffix
+    """
     uptime = run("uptime").split(" ")
 
     return uptime[2] + uptime[3][:-1]
