@@ -1,6 +1,10 @@
 """
 stateis.py
 
+A simple Python command line utility to check the status of your servers.
+
+Installation:
+
 """
 
 
@@ -8,11 +12,7 @@ import argparse
 import fabric
 from fabric.api import *
 from prettytable import PrettyTable
-
-
-env.user = ""
-env.password = ""
-env.hosts = []
+from config import user, password, hosts
 
 
 def stats():
@@ -332,7 +332,14 @@ def get_uptime():
 if __name__=="__main__":
     """
     Main function + argument parser
+
+    Sets environment variables for list of remote hosts and their associated
+    usernames and passwords
     """
+    env.user = user
+    env.password = password
+    env.hosts = hosts
+
     parser = argparse.ArgumentParser()
     parser.add_argument("output_type", help="Specify the type of output " + \
                     "you'd like the results to be", type=str)
