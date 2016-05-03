@@ -81,6 +81,8 @@ def print_stats_table(stats_table):
 
 @runs_once
 def build_xml_file(stats_out):
+    """
+    """
     xml_string = "<servers>\n"
 
     for key in stats_out:
@@ -102,9 +104,47 @@ def build_xml_file(stats_out):
 
 @runs_once
 def write_xml_file(xml_string):
+    """
+    """
     xml_file = open("stateis_output.xml", "w")
     xml_file.write(xml_string)
     xml_file.close()
+
+    return None
+
+
+@runs_once
+def build_json_file(stats_out):
+    """
+    """
+    json_string = "{\n"
+
+    for key in stats_out:
+        json_string += "\t\"" + key + "\":{\n"
+        json_string += "\t\t\"hostname\":\"" + stats_out[key][0] + "\",\n"
+        json_string += "\t\t\"kernel\":\"" + str(stats_out[key][1]) + "\",\n"
+        json_string += "\t\t\"gbused\":\"" + str(stats_out[key][2]) + "\",\n"
+        json_string += "\t\t\"gbavail\":\"" + str(stats_out[key][3]) + "\",\n"
+        json_string += "\t\t\"gbpercent\":\"" + str(stats_out[key][4]) + "\",\n"
+        json_string += "\t\t\"numproc\":\"" + str(stats_out[key][5]) + "\",\n"
+        json_string += "\t\t\"ramuse\":\"" + stats_out[key][6] + "\",\n"
+        json_string += "\t\t\"uptime\":\"" + stats_out[key][7] + "\"\n"
+        json_string += "\t},\n"
+    json_string += "}\n"
+
+    # Easiest way to get rid of the comma after the last json element
+    final_json_string = json_string[:-4] + json_string[-3:]
+
+    return final_json_string
+
+
+@runs_once
+def write_json_file(json_string):
+    """
+    """
+    json_file = open("stateis_output.json", "w")
+    json_file.write(json_string)
+    json_file.close()
 
     return None
 
@@ -220,3 +260,5 @@ if __name__=="__main__":
         print_stats_table(build_stats_table(stats_out))
     elif args.output_type == "xml":
         write_xml_file(build_xml_file(stats_out))
+    elif args.output_type == "json":
+        write_json_file(build_json_file(stats_out))
